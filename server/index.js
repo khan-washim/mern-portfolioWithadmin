@@ -1,4 +1,4 @@
-import 'dotenv/config'; // Top priority
+import 'dotenv/config'; 
 import express from 'express';
 import cors from 'cors';
 import rateLimit from 'express-rate-limit';
@@ -14,55 +14,74 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 // ── Database Connection ──
-// Calling it here to ensure process.env is ready
 connectDB();
 
 // ── Middleware ──
 app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: true }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
+// ── Dynamic CORS Configuration ──
+const allowedOrigins = [
+  'http://localhost:3000', 
+  'http://localhost:5173',
+  process.env.CLIENT_URL // Deploy korle .env theke live URL nibe
+];
 
 app.use(cors({
-  origin: ['http://localhost:3000', 'http://localhost:5173'],
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
 // ── Rate Limiting ──
 const apiLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 200,
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 500, // General limit barano hoyeche
   standardHeaders: true,
   legacyHeaders: false,
 });
 app.use('/api/', apiLimiter);
 
-const contactLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 5,
-  message: { message: 'Too many requests, please try again later.' },
-});
-
 // ── Routes ──
 app.use('/api/auth', authRoutes);
-app.use('/api/contact', contactLimiter, contactRoutes);
+app.use('/api/contact', contactRoutes); // Limiter route file-e apply kora bhalo
 app.use('/api/projects', projectRoutes);
 
-// Health check
+// Health check & Home Route
+app.get('/', (req, res) => {
+  res.send('🚀 Portfolio API is running...');
+});
+
 app.get('/api/health', (req, res) => {
-  res.json({
+  res.status(200).json({
     status: 'OK',
     env: process.env.NODE_ENV || 'development',
     time: new Date().toISOString(),
   });
 });
 
+// ── 404 & Error Handling ──
 app.use((req, res) => {
-  res.status(404).json({ message: `Route ${req.originalUrl} not found` });
+  res.status(404).json({ success: false, message: `Route ${req.originalUrl} not found` });
 });
 
 app.use(errorHandler);
 
-app.listen(PORT, () => {
+// ── Server Listen ──
+const server = app.listen(PORT, () => {
   console.log(`\n🚀 Server running on http://localhost:${PORT}`);
-  console.log(`📦 Environment: ${process.env.NODE_ENV || 'development'}`);
-  console.log(`🌐 API Base:    http://localhost:${PORT}/api\n`);
+  console.log(`🌐 API Base: http://localhost:${PORT}/api\n`);
+});
+
+// Handle Unhandled Rejections (Production security)
+process.on('unhandledRejection', (err) => {
+  console.log(`Error: ${err.message}`);
+  server.close(() => process.exit(1));
 });

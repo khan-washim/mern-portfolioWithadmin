@@ -11,6 +11,7 @@ import AdminLayout from './pages/admin/Layout';
 import Dashboard from './pages/admin/Dashboard';
 import AdminProjects from './pages/admin/Projects';
 import AdminMessages from './pages/admin/Messages';
+import Settings from './pages/admin/Settings'; // <-- Settings Import kora hoyeche
 
 function PrivateRoute({ children }) {
   return localStorage.getItem('token') ? children : <Navigate to="/admin/login" replace />;
@@ -38,12 +39,16 @@ export default function App() {
       <Routes>
         <Route path="/" element={<Portfolio />} />
         <Route path="/admin/login" element={<AdminLogin />} />
+        
+        {/* Admin Section with Settings Route */}
         <Route path="/admin" element={<PrivateRoute><AdminLayout /></PrivateRoute>}>
           <Route index element={<Navigate to="/admin/dashboard" replace />} />
           <Route path="dashboard" element={<Dashboard />} />
           <Route path="projects" element={<AdminProjects />} />
           <Route path="messages" element={<AdminMessages />} />
+          <Route path="settings" element={<Settings />} /> {/* <-- Settings Route Add kora hoyeche */}
         </Route>
+
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>

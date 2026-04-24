@@ -8,13 +8,20 @@ const connectDB = async () => {
       throw new Error("MONGO_URI is not defined in .env file");
     }
 
-    const conn = await mongoose.connect(uri);
+    // Mongoose connection options (modern version-e dorkar na holeo security-r jonno bhalo)
+    const conn = await mongoose.connect(uri, {
+      autoIndex: true, // Production-e index build nishchit kore
+    });
     
     console.log(`✅ MongoDB Connected: ${conn.connection.host}`);
+
+    // Connection error handle kora runtime-e
+    mongoose.connection.on('error', err => {
+      console.error(`❌ Mongoose runtime error: ${err}`);
+    });
+
   } catch (error) {
     console.error(`❌ MongoDB Connection Error: ${error.message}`);
-    // Optional: Log process.env to see what is actually there (Careful with secrets!)
-    // console.log(process.env); 
     process.exit(1);
   }
 };

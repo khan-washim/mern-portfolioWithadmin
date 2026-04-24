@@ -1,0 +1,15 @@
+{
+  "name": "mern-devfolio",
+  "version": "1.0.0",
+  "description": "Full Stack MERN Portfolio — React + Vite + Bootstrap + Node + Express + MongoDB",
+  "scripts": {
+    "client": "cd client && npm run dev",
+    "server": "cd server && npm run dev",
+    "dev": "npm run server & npm run client",
+    "install:all": "cd client && npm install && cd ../server && npm install",
+    "build": "cd client && npm run build"
+  },
+  "keywords": ["mern", "react", "vite", "bootstrap", "portfolio"],
+  "author": "DevFolio",
+  "license": "MIT"
+}

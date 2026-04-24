@@ -5,6 +5,9 @@ export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
 
+  // চেক করুন ইউজার লগইন করা কি না (টোকেন থাকলে বাটন শো করবে)
+  const isAuthenticated = localStorage.getItem('token');
+
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 40);
     window.addEventListener('scroll', onScroll);
@@ -38,29 +41,34 @@ export default function Navbar() {
               borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center',
               fontSize: '1rem', fontWeight: 800, fontFamily: 'Syne, sans-serif', color: '#fff',
             }}>W</div>
-            <span style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: '1.1rem' }}>
+            <span style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: '1.1rem', color: '#e8e6f0' }}>
               Washim<span style={{ color: '#7c6af7' }}>.</span>
             </span>
           </a>
 
+          {/* Desktop Navigation */}
           <div className="desktop-nav" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             {navLinks.map(l => (
               <a key={l.href} href={l.href} style={{
                 color: '#6b6880', fontFamily: 'DM Sans, sans-serif', fontWeight: 500,
                 fontSize: '0.9rem', padding: '8px 16px', borderRadius: 50,
-                transition: 'all 0.2s',
+                transition: 'all 0.2s', textDecoration: 'none'
               }}
               onMouseEnter={e => { e.target.style.color = '#e8e6f0'; e.target.style.background = 'rgba(255,255,255,0.05)'; }}
               onMouseLeave={e => { e.target.style.color = '#6b6880'; e.target.style.background = 'transparent'; }}>
                 {l.label}
               </a>
             ))}
-            <Link to="/admin/login" style={{
-              background: 'linear-gradient(135deg, #7c6af7, #e879f9)',
-              color: '#fff', border: 'none', padding: '9px 20px',
-              borderRadius: 50, fontFamily: 'Syne, sans-serif', fontWeight: 600,
-              fontSize: '0.85rem', marginLeft: 8,
-            }}>Admin</Link>
+
+            {/* শুধুমাত্র লগইন থাকলে ডেস্কটপে Admin বাটন দেখাবে */}
+            {isAuthenticated && (
+              <Link to="/admin/login" style={{
+                background: 'linear-gradient(135deg, #7c6af7, #e879f9)',
+                color: '#fff', border: 'none', padding: '9px 20px',
+                borderRadius: 50, fontFamily: 'Syne, sans-serif', fontWeight: 600,
+                fontSize: '0.85rem', marginLeft: 8, textDecoration: 'none'
+              }}>Admin</Link>
+            )}
           </div>
 
           <button onClick={() => setMenuOpen(!menuOpen)} className="hamburger-btn" style={{
@@ -72,6 +80,7 @@ export default function Navbar() {
         </div>
       </nav>
 
+      {/* Mobile Menu */}
       {menuOpen && (
         <div style={{
           position: 'fixed', inset: 0, zIndex: 999,
@@ -80,16 +89,20 @@ export default function Navbar() {
         }}>
           {navLinks.map(l => (
             <a key={l.href} href={l.href} onClick={() => setMenuOpen(false)} style={{
-              fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: '2rem', color: '#e8e6f0',
+              fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: '2rem', color: '#e8e6f0', textDecoration: 'none'
             }}
             onMouseEnter={e => e.target.style.color = '#7c6af7'}
             onMouseLeave={e => e.target.style.color = '#e8e6f0'}>{l.label}</a>
           ))}
-          <Link to="/admin/login" onClick={() => setMenuOpen(false)} style={{
-            background: 'linear-gradient(135deg, #7c6af7, #e879f9)',
-            color: '#fff', padding: '12px 32px', borderRadius: 50,
-            fontFamily: 'Syne, sans-serif', fontWeight: 600, fontSize: '1rem',
-          }}>Admin Panel</Link>
+
+          {/* শুধুমাত্র লগইন থাকলে মোবাইলেও Admin বাটন দেখাবে */}
+          {isAuthenticated && (
+            <Link to="/admin/login" onClick={() => setMenuOpen(false)} style={{
+              background: 'linear-gradient(135deg, #7c6af7, #e879f9)',
+              color: '#fff', padding: '12px 32px', borderRadius: 50,
+              fontFamily: 'Syne, sans-serif', fontWeight: 600, fontSize: '1rem', textDecoration: 'none'
+            }}>Admin Panel</Link>
+          )}
         </div>
       )}
 

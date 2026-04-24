@@ -1,113 +1,92 @@
-import { useState, useRef, useEffect } from 'react'
-import { useReveal } from '../hooks/useReveal'
-import api from '../utils/api'
+import { useState, useEffect } from 'react';
+import api from '../utils/api';
+import { useReveal } from '../hooks/useReveal';
 
-const FALLBACK = [
-  { _id:'1', title:'Business Dashboard', description:'Admin panel with analytics, auth & role management built on MERN.', tags:['React','Node.js','MongoDB','Chart.js'], image:'https://picsum.photos/600/380?random=10', liveUrl:'#', githubUrl:'#', accent:'#c6ff00' },
-  { _id:'2', title:'Hotel Booking App',  description:'Full-featured booking platform with Stripe payment & real-time availability.', tags:['MERN','Stripe','JWT','Bootstrap'], image:'https://picsum.photos/600/380?random=20', liveUrl:'#', githubUrl:'#', accent:'#ff3c5f' },
-  { _id:'3', title:'POS System',         description:'Pharmacy point-of-sale with dark mode, invoices & sales analytics.', tags:['React','Express','MongoDB','PWA'], image:'https://picsum.photos/600/380?random=30', liveUrl:'#', githubUrl:'#', accent:'#4dffb4' },
-  { _id:'4', title:'E-Commerce Platform',description:'Multi-vendor marketplace with cart, wishlist & admin dashboard.', tags:['MERN','Redux','Cloudinary'], image:'https://picsum.photos/600/380?random=40', liveUrl:'#', githubUrl:'#', accent:'#c084fc' },
-  { _id:'5', title:'Task Manager',       description:'Real-time collaborative project tool with drag-and-drop & Socket.io.', tags:['React','Socket.io','Node.js'], image:'https://picsum.photos/600/380?random=50', liveUrl:'#', githubUrl:'#', accent:'#60a5fa' },
-  { _id:'6', title:'Blog CMS',           description:'Content management with rich editor, SEO tools & reader analytics.', tags:['React','Node.js','Quill'], image:'https://picsum.photos/600/380?random=60', liveUrl:'#', githubUrl:'#', accent:'#fb923c' },
-]
+export default function Projects() {
+  const [projects, setProjects] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [filter, setFilter] = useState('All');
+  const { ref } = useReveal();
 
-function Card({ p }) {
-  const [hov, setHov] = useState(false)
+  useEffect(() => {
+    api.get('/projects')
+      .then(r => setProjects(r.data.data || r.data))
+      .catch(() => setProjects([]))
+      .finally(() => setLoading(false));
+  }, []);
+
+  const categories = ['All', ...new Set(projects.map(p => p.category || 'Web'))];
+  const filtered = filter === 'All' ? projects : projects.filter(p => (p.category || 'Web') === filter);
+
   return (
-    <div className="col-md-6 col-lg-4">
-      <div
-        style={{
-          background: 'var(--clr-card)',
-          border: `1px solid ${hov ? p.accent + '50' : 'var(--clr-border)'}`,
-          borderRadius: 'var(--radius-lg)',
-          overflow: 'hidden',
-          height: '100%',
-          transition: 'border-color .3s, transform .3s, box-shadow .3s',
-          transform: hov ? 'translateY(-8px)' : 'translateY(0)',
-          boxShadow: hov ? `0 20px 50px rgba(0,0,0,.5)` : 'none',
-        }}
-        onMouseEnter={() => setHov(true)}
-        onMouseLeave={() => setHov(false)}
-      >
-        {/* Image */}
-        <div style={{ position: 'relative', aspectRatio: '16/10', overflow: 'hidden' }}>
-          <img
-            src={p.image}
-            alt={p.title}
-            style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform .5s', transform: hov ? 'scale(1.08)' : 'scale(1)' }}
-          />
-          {/* Overlay */}
-          <div style={{
-            position: 'absolute', inset: 0,
-            background: 'rgba(0,0,0,.7)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 16,
-            opacity: hov ? 1 : 0,
-            transition: 'opacity .3s',
-          }}>
-            <a href={p.githubUrl} target="_blank" rel="noreferrer"
-              style={{ width:44,height:44, background:'rgba(255,255,255,.08)', border:'1px solid rgba(255,255,255,.15)', borderRadius:'50%', display:'flex',alignItems:'center',justifyContent:'center', color:'#fff', textDecoration:'none', backdropFilter:'blur(8px)' }}>
-              <i className="bi bi-github"></i>
-            </a>
-            <a href={p.liveUrl} target="_blank" rel="noreferrer"
-              style={{ width:44,height:44, background:p.accent, borderRadius:'50%', display:'flex',alignItems:'center',justifyContent:'center', color:'#000', textDecoration:'none' }}>
-              <i className="bi bi-arrow-up-right"></i>
-            </a>
-          </div>
-          {/* Accent number */}
-          <div style={{
-            position:'absolute', top:14, left:14,
-            background: p.accent, color:'#000',
-            fontFamily:'var(--font-display)', fontSize:'.72rem', letterSpacing:'.05em',
-            padding:'3px 12px', borderRadius:'100px',
-          }}>
-            {String(FALLBACK.findIndex(x => x._id === p._id)+1).padStart(2,'0')}
-          </div>
+    <section id="projects" ref={ref} style={{ padding: '120px 24px' }}>
+      <div style={{ maxWidth: 1200, margin: '0 auto' }}>
+        <div style={{ textAlign: 'center', marginBottom: 48 }} className="reveal">
+          <span className="section-tag"><i className="bi bi-grid-3x3-gap"></i> Portfolio</span>
+          <h2 style={{ fontSize: 'clamp(2rem, 4vw, 3rem)' }}>Featured <span className="gradient-text">Projects</span></h2>
         </div>
-        {/* Body */}
-        <div style={{ padding: '22px 24px 26px' }}>
-          <h5 style={{ fontFamily:'var(--font-display)', fontSize:'1.15rem', letterSpacing:'.03em', color:'var(--clr-text)', marginBottom:8 }}>{p.title}</h5>
-          <p style={{ fontSize:'.81rem', color:'var(--clr-muted)', lineHeight:1.65, marginBottom:14 }}>{p.description}</p>
-          <div className="d-flex flex-wrap gap-2">
-            {p.tags.map(t => (
-              <span key={t} style={{
-                padding:'3px 10px', borderRadius:'100px', fontSize:'.66rem', fontWeight:600, letterSpacing:'.04em',
-                background: p.accent+'18', color: p.accent, border:`1px solid ${p.accent}30`,
-              }}>{t}</span>
-            ))}
+        <div style={{ display: 'flex', justifyContent: 'center', gap: 10, flexWrap: 'wrap', marginBottom: 48 }} className="reveal">
+          {categories.map(c => (
+            <button key={c} onClick={() => setFilter(c)} style={{
+              padding: '8px 20px', borderRadius: 50,
+              border: `1px solid ${filter === c ? 'transparent' : 'rgba(255,255,255,0.08)'}`,
+              background: filter === c ? 'linear-gradient(135deg, #7c6af7, #e879f9)' : 'transparent',
+              color: filter === c ? '#fff' : '#6b6880',
+              fontFamily: 'Syne, sans-serif', fontWeight: 600, fontSize: '0.85rem', cursor: 'pointer',
+            }}>{c}</button>
+          ))}
+        </div>
+        {loading ? (
+          <div style={{ textAlign: 'center', padding: 64 }}>
+            <div style={{ width: 48, height: 48, borderRadius: '50%', border: '3px solid rgba(124,106,247,0.2)', borderTop: '3px solid #7c6af7', animation: 'spin 1s linear infinite', margin: '0 auto' }}></div>
           </div>
+        ) : filtered.length === 0 ? (
+          <div style={{ textAlign: 'center', padding: 64, color: '#6b6880' }}>
+            <i className="bi bi-folder-x" style={{ fontSize: '3rem', display: 'block', marginBottom: 16 }}></i>
+            No projects yet. Add some from the admin panel.
+          </div>
+        ) : (
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: 24 }}>
+            {filtered.map((p, i) => <ProjectCard key={p._id} project={p} delay={i * 0.06} />)}
+          </div>
+        )}
+      </div>
+      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+    </section>
+  );
+}
+
+function ProjectCard({ project: p, delay }) {
+  const [hovered, setHovered] = useState(false);
+  return (
+    <div className="glass-card reveal" style={{ overflow: 'hidden', transitionDelay: `${delay}s` }}
+      onMouseEnter={() => setHovered(true)} onMouseLeave={() => setHovered(false)}>
+      <div style={{ height: 200, position: 'relative', overflow: 'hidden', background: 'linear-gradient(135deg, rgba(124,106,247,0.15), rgba(232,121,249,0.08))', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        {p.image ? (
+          <img src={p.image} alt={p.title} style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.4s ease', transform: hovered ? 'scale(1.05)' : 'scale(1)' }} />
+        ) : (
+          <i className="bi bi-window-stack" style={{ fontSize: '3.5rem', color: 'rgba(124,106,247,0.4)' }}></i>
+        )}
+        <div style={{ position: 'absolute', inset: 0, background: 'rgba(5,5,8,0.8)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12, opacity: hovered ? 1 : 0, transition: 'opacity 0.3s' }}>
+          {p.liveUrl && <a href={p.liveUrl} target="_blank" rel="noreferrer" className="btn-primary-custom" style={{ padding: '10px 18px', fontSize: '0.8rem' }}><i className="bi bi-box-arrow-up-right"></i> Live</a>}
+          {p.githubUrl && <a href={p.githubUrl} target="_blank" rel="noreferrer" className="btn-outline-custom" style={{ padding: '10px 18px', fontSize: '0.8rem' }}><i className="bi bi-github"></i> Code</a>}
+        </div>
+        {p.featured && <span style={{ position: 'absolute', top: 14, right: 14, background: 'linear-gradient(135deg, #7c6af7, #e879f9)', color: '#fff', padding: '3px 10px', borderRadius: 50, fontSize: '0.7rem', fontWeight: 600, fontFamily: 'Syne, sans-serif' }}>Featured</span>}
+      </div>
+      <div style={{ padding: 24 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 10 }}>
+          <h3 style={{ fontFamily: 'Syne, sans-serif', fontSize: '1.05rem', fontWeight: 700 }}>{p.title}</h3>
+          {p.category && <span className="badge-tech" style={{ fontSize: '0.7rem' }}>{p.category}</span>}
+        </div>
+        <p style={{ color: '#6b6880', fontSize: '0.875rem', lineHeight: 1.7, marginBottom: 18 }}>
+          {p.description?.slice(0, 120)}{p.description?.length > 120 ? '...' : ''}
+        </p>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+          {(p.technologies || p.tech || []).slice(0, 5).map(t => (
+            <span key={t} style={{ fontSize: '0.72rem', padding: '3px 10px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 50, color: '#6b6880' }}>{t}</span>
+          ))}
         </div>
       </div>
     </div>
-  )
-}
-
-export default function Projects() {
-  const ref = useRef()
-  const [projects, setProjects] = useState(FALLBACK)
-  useReveal(ref)
-
-  useEffect(() => {
-    api.get('/projects').then(r => { if (r.data?.length) setProjects(r.data) }).catch(() => {})
-  }, [])
-
-  return (
-    <section id="projects" className="section-py" style={{ background: 'var(--clr-surface)' }} ref={ref}>
-      <div className="container">
-        <div className="d-flex flex-wrap justify-content-between align-items-end mb-5 reveal">
-          <div>
-            <span className="section-label">— Recent Work</span>
-            <h2 className="display-heading mt-2" style={{ fontSize:'clamp(2.4rem,5vw,4rem)', color:'var(--clr-text)' }}>
-              FEATURED<br/>PROJECTS
-            </h2>
-          </div>
-          <a href="#" style={{ color:'var(--clr-accent)', fontWeight:600, fontSize:'.82rem', letterSpacing:'.08em', textTransform:'uppercase', textDecoration:'none', borderBottom:'1px solid rgba(198,255,0,.3)', paddingBottom:2 }}>
-            View All <i className="bi bi-arrow-right"></i>
-          </a>
-        </div>
-        <div className="row g-4 reveal d1">
-          {projects.map(p => <Card key={p._id} p={p} />)}
-        </div>
-      </div>
-    </section>
-  )
+  );
 }

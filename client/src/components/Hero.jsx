@@ -1,211 +1,105 @@
 import { useEffect, useRef } from 'react';
-// সঠিক পাথ: '../' দিয়ে components ফোল্ডার থেকে বের হয়ে assets এ ঢুকবে
-// আপনার ইমেজের নাম 'my-image.jpg' না হলে এখানে সেই নাম দিয়ে দিন
-import myPhoto from '../assets/my-image.jpg'; 
 
-const ROLES = ['Full Stack Developer', 'MERN Expert', 'UI/UX Engineer', 'React Developer'];
+const roles = ['Full Stack Developer', 'MERN Specialist', 'UI/UX Enthusiast', 'Open Source Lover'];
 
 export default function Hero() {
-  const roleRef = useRef();
-  const idx = useRef(0);
+  const roleRef = useRef(null);
+  const idxRef = useRef(0);
+  const charRef = useRef(0);
+  const deletingRef = useRef(false);
 
   useEffect(() => {
-    let charIdx = 0;
-    let deleting = false;
-    let timeout;
-
+    let timer;
     const type = () => {
-      const word = ROLES[idx.current];
-      if (!roleRef.current) return;
-
-      if (!deleting) {
-        roleRef.current.textContent = word.slice(0, ++charIdx);
-        if (charIdx === word.length) {
-          deleting = true;
-          timeout = setTimeout(type, 1800);
-          return;
-        }
+      const current = roles[idxRef.current];
+      if (!deletingRef.current) {
+        charRef.current++;
+        if (roleRef.current) roleRef.current.textContent = current.slice(0, charRef.current);
+        if (charRef.current === current.length) { deletingRef.current = true; timer = setTimeout(type, 1800); return; }
       } else {
-        roleRef.current.textContent = word.slice(0, --charIdx);
-        if (charIdx === 0) {
-          deleting = false;
-          idx.current = (idx.current + 1) % ROLES.length;
-        }
+        charRef.current--;
+        if (roleRef.current) roleRef.current.textContent = current.slice(0, charRef.current);
+        if (charRef.current === 0) { deletingRef.current = false; idxRef.current = (idxRef.current + 1) % roles.length; }
       }
-      timeout = setTimeout(type, deleting ? 50 : 90);
+      timer = setTimeout(type, deletingRef.current ? 50 : 90);
     };
-
-    timeout = setTimeout(type, 600);
-    return () => clearTimeout(timeout);
+    timer = setTimeout(type, 500);
+    return () => clearTimeout(timer);
   }, []);
 
   return (
-    <section
-      id="home"
-      className="grid-bg"
-      style={{
-        minHeight: '100vh',
-        display: 'flex',
-        alignItems: 'center',
-        paddingTop: '100px',
-        paddingBottom: '60px',
-        overflow: 'hidden',
-        position: 'relative',
-      }}
-    >
-      {/* Background Glows */}
-      <div style={{
-        position: 'absolute', top: '10%', right: '-5%',
-        width: '600px', height: '600px',
-        background: 'radial-gradient(circle, rgba(198,255,0,0.06) 0%, transparent 70%)',
-        borderRadius: '50%',
-        animation: 'scaleBreath 10s ease-in-out infinite',
-        zIndex: 0,
-      }} />
-      <div style={{
-        position: 'absolute', bottom: '5%', left: '-10%',
-        width: '400px', height: '400px',
-        background: 'radial-gradient(circle, rgba(255,60,95,0.05) 0%, transparent 70%)',
-        borderRadius: '50%',
-        zIndex: 0,
-      }} />
+    <section style={{
+      minHeight: '100vh', display: 'flex', alignItems: 'center',
+      position: 'relative', overflow: 'hidden', padding: '120px 24px 80px',
+    }}>
+      <div style={{ position: 'absolute', top: '10%', right: '5%', width: 500, height: 500, background: 'radial-gradient(circle, rgba(124,106,247,0.12) 0%, transparent 70%)', borderRadius: '50%', pointerEvents: 'none' }} />
+      <div style={{ position: 'absolute', bottom: '5%', left: '-5%', width: 400, height: 400, background: 'radial-gradient(circle, rgba(232,121,249,0.08) 0%, transparent 70%)', borderRadius: '50%', pointerEvents: 'none' }} />
 
-      <div className="container position-relative" style={{ zIndex: 1 }}>
-        <div className="row align-items-center g-5">
-
-          {/* ── LEFT SIDE ── */}
-          <div className="col-lg-7">
-            <div className="d-flex align-items-center gap-2 mb-4"
-              style={{ opacity: 0, transform: 'translateY(30px)', animation: 'toastIn .7s .1s forwards' }}>
-              <span className="live-dot"></span>
-              <span style={{ fontSize: '0.78rem', fontWeight: 500, color: 'var(--clr-muted)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
-                Available for work
-              </span>
+      <div style={{ maxWidth: 1200, margin: '0 auto', width: '100%' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 64, alignItems: 'center' }}>
+          <div style={{ animation: 'fadeUp 0.8s ease forwards' }}>
+            <div className="section-tag" style={{ marginBottom: 24 }}>
+              <span style={{ width: 6, height: 6, background: '#7c6af7', borderRadius: '50%', display: 'inline-block' }}></span>
+              Available for Work
             </div>
-
-            <h1
-              className="display-heading"
-              style={{
-                fontSize: 'clamp(3.8rem, 9vw, 8rem)',
-                color: 'var(--clr-text)',
-                opacity: 0,
-                animation: 'toastIn .9s .2s forwards',
-              }}
-            >
-              FULL<br />
-              <span style={{ WebkitTextStroke: '2px rgba(255,255,255,0.25)', color: 'transparent' }}>STACK</span>
-              <span style={{ color: 'var(--clr-accent)' }}>.</span>
+            <h1 style={{ fontSize: 'clamp(2.5rem, 6vw, 4.5rem)', marginBottom: 12, lineHeight: 1.05 }}>
+              Hi, I'm <span className="gradient-text">Washim Khan</span>
             </h1>
-
-            {/* Typewriter */}
-            <div
-              style={{
-                fontFamily: 'var(--font-body)',
-                fontSize: 'clamp(1rem, 2vw, 1.25rem)',
-                fontWeight: 300,
-                color: 'var(--clr-muted)',
-                marginTop: '18px',
-                marginBottom: '28px',
-                minHeight: '2em',
-                opacity: 0,
-                animation: 'toastIn .9s .4s forwards',
-              }}
-            >
-              <span ref={roleRef} style={{ color: 'var(--clr-accent)', fontWeight: 500 }}></span>
-              <span style={{ animation: 'livePulse 1s infinite' }}>|</span>
-            </div>
-
-            <p style={{
-              color: 'var(--clr-muted)',
-              fontSize: '1rem',
-              maxWidth: '520px',
-              lineHeight: 1.8,
-              marginBottom: '36px',
-              opacity: 0,
-              animation: 'toastIn .9s .5s forwards',
-            }}>
-              I build blazing-fast, scalable web apps using the MERN stack.
-              From pixel-perfect frontends to rock-solid APIs — I ship products that matter.
+            <h2 style={{ fontSize: 'clamp(1.2rem, 3vw, 1.8rem)', color: '#6b6880', fontWeight: 400, marginBottom: 24, height: 44, fontFamily: 'DM Sans, sans-serif' }}>
+              <span ref={roleRef} style={{ color: '#e8e6f0' }}></span>
+              <span style={{ display: 'inline-block', width: 2, height: '1em', background: '#7c6af7', marginLeft: 2, verticalAlign: 'middle', animation: 'blink 1s infinite' }}></span>
+            </h2>
+            <p style={{ color: '#6b6880', fontSize: '1.05rem', maxWidth: 480, marginBottom: 40, lineHeight: 1.8 }}>
+              I build full-stack web applications with clean code, beautiful UI, and scalable architecture. Let's create something remarkable together.
             </p>
-
-            <div className="d-flex flex-wrap gap-3"
-              style={{ opacity: 0, animation: 'toastIn .9s .6s forwards' }}>
-              <a href="/#projects" className="btn-accent">
-                View Projects <i className="bi bi-arrow-right"></i>
-              </a>
-              <a href="/#contact" className="btn-outline">
-                Let's Talk
-              </a>
+            <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>
+              <a href="#projects" className="btn-primary-custom"><i className="bi bi-grid-3x3-gap"></i> View Projects</a>
+              <a href="#contact" className="btn-outline-custom"><i className="bi bi-envelope"></i> Get in Touch</a>
             </div>
-
-            {/* Experience Stats */}
-            <div className="d-flex gap-5 mt-5"
-              style={{ opacity: 0, animation: 'toastIn .9s .8s forwards' }}>
-              {[['3+','Years Exp.'],['50+','Projects'],['100%','Satisfaction']].map(([n,l]) => (
-                <div key={l}>
-                  <div style={{ fontFamily: 'var(--font-display)', fontSize: '2.4rem', color: 'var(--clr-accent)', lineHeight: 1 }}>{n}</div>
-                  <div style={{ fontSize: '0.72rem', fontWeight: 500, color: 'var(--clr-muted)', letterSpacing: '0.06em', marginTop: '4px', textTransform: 'uppercase' }}>{l}</div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 24, marginTop: 56, paddingTop: 40, borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+              {[{ n: '15+', label: 'Projects' }, { n: '2+', label: 'Years Exp.' }, { n: '100%', label: 'Dedication' }].map(s => (
+                <div key={s.label}>
+                  <div style={{ fontFamily: 'Syne, sans-serif', fontSize: '1.8rem', fontWeight: 800, color: '#7c6af7' }}>{s.n}</div>
+                  <div style={{ fontSize: '0.8rem', color: '#6b6880', marginTop: 2 }}>{s.label}</div>
                 </div>
               ))}
             </div>
           </div>
 
-          {/* ── RIGHT SIDE ── */}
-          <div className="col-lg-5 text-center" style={{ opacity: 0, animation: 'toastIn .9s .3s forwards' }}>
-            <div style={{ position: 'relative', display: 'inline-block' }}>
-              {/* Orbit Ring */}
+          <div style={{ display: 'flex', justifyContent: 'center' }}>
+            <div style={{ position: 'relative', width: 340, height: 380 }}>
               <div style={{
-                position: 'absolute', inset: '-36px',
-                border: '1px dashed rgba(198,255,0,0.2)',
-                borderRadius: '50%',
-                animation: 'rotateSlow 25s linear infinite',
-              }} />
-              
-              {/* Image */}
-              <img
-                src={myPhoto}
-                alt="Khan Washim Uddin"
-                style={{
-                  width: '300px',
-                  height: '300px',
-                  objectFit: 'cover',
-                  borderRadius: '28px',
-                  border: '2px solid rgba(198,255,0,0.15)',
-                  animation: 'floatY 5s ease-in-out infinite',
-                  position: 'relative',
-                  zIndex: 1,
-                }}
-              />
-
-              {/* Badges */}
-              <div style={{
-                position: 'absolute', bottom: '28px', left: '-54px',
-                background: 'var(--clr-card)',
-                border: '1px solid var(--clr-border)',
-                borderRadius: '14px',
-                padding: '12px 18px',
-                zIndex: 2, textAlign: 'left',
-                backdropFilter: 'blur(10px)',
-              }}>
-                <div style={{ fontSize: '0.62rem', color: 'var(--clr-muted)', letterSpacing: '0.08em', textTransform: 'uppercase' }}>Stack</div>
-                <div style={{ fontFamily: 'var(--font-display)', fontSize: '1rem', color: 'var(--clr-text)', letterSpacing: '0.05em' }}>MERN + Vite</div>
-              </div>
-
-              <div style={{
-                position: 'absolute', top: '20px', right: '-52px',
-                background: 'var(--clr-accent)',
-                borderRadius: '14px',
-                padding: '12px 18px',
-                zIndex: 2,
-              }}>
-                <div style={{ fontSize: '1.3rem' }}>🚀</div>
-                <div style={{ fontSize: '0.6rem', fontWeight: 700, color: '#000', letterSpacing: '0.06em', textTransform: 'uppercase' }}>Open<br/>to work</div>
-              </div>
+                position: 'absolute', inset: 0,
+                background: 'linear-gradient(135deg, rgba(124,106,247,0.2), rgba(232,121,249,0.1))',
+                borderRadius: 32, border: '1px solid rgba(124,106,247,0.2)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                fontSize: '8rem', color: 'rgba(124,106,247,0.3)',
+              }}><i className="bi bi-person-circle"></i></div>
+              {[
+                { icon: 'bi-code-slash', label: 'React', top: -20, right: -20, color: '#61DAFB' },
+                { icon: 'bi-database', label: 'MongoDB', bottom: 40, left: -30, color: '#47A248' },
+                { icon: 'bi-server', label: 'Node.js', bottom: -20, right: 20, color: '#8CC84B' },
+              ].map(b => (
+                <div key={b.label} style={{
+                  position: 'absolute', top: b.top, right: b.right, bottom: b.bottom, left: b.left,
+                  background: '#0d0d14', border: '1px solid rgba(255,255,255,0.08)',
+                  borderRadius: 12, padding: '10px 14px',
+                  display: 'flex', alignItems: 'center', gap: 8,
+                  fontSize: '0.8rem', fontWeight: 600, fontFamily: 'Syne, sans-serif',
+                  whiteSpace: 'nowrap', boxShadow: '0 8px 24px rgba(0,0,0,0.4)',
+                }}>
+                  <i className={`bi ${b.icon}`} style={{ color: b.color, fontSize: '1rem' }}></i>
+                  {b.label}
+                </div>
+              ))}
             </div>
           </div>
-
         </div>
       </div>
+      <style>{`
+        @keyframes fadeUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+      `}</style>
     </section>
   );
 }

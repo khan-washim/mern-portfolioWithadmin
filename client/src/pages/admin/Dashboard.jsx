@@ -1,330 +1,78 @@
-import { useState, useEffect, useMemo } from 'react'
-import { Link } from 'react-router-dom'
-import api from '../../utils/api'
-import { useAuth } from '../../context/AuthContext'
+import { useState, useEffect } from 'react';
+import api from '../../utils/api';
 
-// --- Sub-Components ---
-
-function StatCard({ icon, label, value, sub, accent, loading }) {
+function StatCard({ icon, label, value, color, trend }) {
   return (
-    <div 
-      className="h-100"
-      style={{
-        background: 'var(--clr-card)',
-        border: '1px solid var(--clr-border)',
-        borderRadius: 'var(--radius-md)',
-        padding: '24px',
-        transition: 'all .3s ease',
-      }}
-      onMouseEnter={e => { 
-        e.currentTarget.style.borderColor = accent + '80'; 
-        e.currentTarget.style.transform = 'translateY(-5px)';
-        e.currentTarget.style.boxShadow = `0 10px 30px ${accent}15`;
-      }}
-      onMouseLeave={e => { 
-        e.currentTarget.style.borderColor = 'var(--clr-border)'; 
-        e.currentTarget.style.transform = 'translateY(0)';
-        e.currentTarget.style.boxShadow = 'none';
-      }}
-    >
+    <div style={{ background: '#0d0d14', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 16, padding: 24, display: 'flex', flexDirection: 'column', gap: 12, transition: 'all 0.3s', cursor: 'default' }}
+      onMouseEnter={e => { e.currentTarget.style.borderColor = `${color}33`; e.currentTarget.style.transform = 'translateY(-2px)'; }}
+      onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.06)'; e.currentTarget.style.transform = 'none'; }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-        <div>
-          <div style={{ fontSize: '0.72rem', fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--clr-muted)', marginBottom: 10 }}>
-            {label}
-          </div>
-          <div style={{ fontFamily: 'var(--font-display)', fontSize: '2.6rem', letterSpacing: '0.02em', color: 'var(--clr-text)', lineHeight: 1 }}>
-            {loading ? '—' : value}
-          </div>
-          {sub && <div style={{ fontSize: '0.75rem', color: 'var(--clr-muted)', marginTop: 6 }}>{sub}</div>}
+        <div style={{ width: 44, height: 44, borderRadius: 12, background: `${color}18`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.1rem', color }}>
+          <i className={`bi ${icon}`}></i>
         </div>
-        <div style={{
-          width: 46, height: 46,
-          background: accent + '15',
-          border: `1px solid ${accent}25`,
-          borderRadius: 'var(--radius-sm)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          flexShrink: 0,
-        }}>
-          <i className={`bi ${icon}`} style={{ color: accent, fontSize: '1.2rem' }}></i>
-        </div>
+        {trend && <span style={{ fontSize: '0.72rem', color: '#4ade80', background: 'rgba(74,222,128,0.1)', padding: '3px 8px', borderRadius: 50 }}>{trend}</span>}
+      </div>
+      <div>
+        <div style={{ fontFamily: 'Syne, sans-serif', fontSize: '2rem', fontWeight: 800 }}>{value}</div>
+        <div style={{ color: '#6b6880', fontSize: '0.85rem' }}>{label}</div>
       </div>
     </div>
-  )
+  );
 }
-
-function MsgRow({ msg, onRead }) {
-  const badge = { unread: '#c6ff00', read: 'var(--clr-muted)', replied: '#4dffb4' }
-  return (
-    <div style={{
-      display: 'flex', alignItems: 'center', gap: 14,
-      padding: '14px 0',
-      borderBottom: '1px solid var(--clr-border)',
-    }}>
-      <div style={{
-        width: 38, height: 38,
-        background: 'rgba(198,255,0,0.08)',
-        borderRadius: '50%',
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        fontFamily: 'var(--font-display)', color: 'var(--clr-accent)', fontSize: '1rem',
-        flexShrink: 0,
-      }}>
-        {msg.name[0].toUpperCase()}
-      </div>
-      <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8 }}>
-          <span style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--clr-text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-            {msg.name}
-          </span>
-          <span style={{
-            fontSize: '0.62rem', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase',
-            color: badge[msg.status] || 'var(--clr-muted)', flexShrink: 0,
-          }}>
-            {msg.status}
-          </span>
-        </div>
-        <div style={{ fontSize: '0.78rem', color: 'var(--clr-muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-          {msg.subject}
-        </div>
-      </div>
-      {msg.status === 'unread' && (
-        <button 
-          onClick={() => onRead(msg._id)} 
-          className="btn-read-hover"
-          style={{
-            background: 'none', border: '1px solid var(--clr-border)',
-            borderRadius: 'var(--radius-sm)', color: 'var(--clr-muted)',
-            cursor: 'pointer', padding: '4px 10px', fontSize: '0.72rem', flexShrink: 0,
-            transition: 'all 0.2s'
-          }}
-        >
-          Mark read
-        </button>
-      )}
-    </div>
-  )
-}
-
-// --- Main Dashboard Component ---
 
 export default function Dashboard() {
-  const { user } = useAuth()
-  const [stats, setStats] = useState({ projects: 0, messages: 0, unread: 0 })
-  const [msgs, setMsgs] = useState([])
-  const [projs, setProjs] = useState([])
-  const [loading, setLoading] = useState(true)
+  const [stats, setStats] = useState({ projects: 0, messages: 0, unread: 0 });
+  const [recentMessages, setRecentMessages] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setLoading(true)
-        const [pr, co] = await Promise.all([
-          api.get('/projects'),
-          api.get('/contact'),
-        ])
-        
-        const projects = pr.data.data || []
-        const messages = co.data.data || []
-        const unreadCount = messages.filter(m => m.status === 'unread').length
-        
-        setStats({ projects: projects.length, messages: messages.length, unread: unreadCount })
-        setMsgs(messages.slice(0, 5))
-        setProjs(projects.slice(0, 4))
-      } catch (error) {
-        console.error("Dashboard Fetch Error:", error)
-      } finally {
-        setLoading(false)
-      }
-    }
-    fetchData()
-  }, [])
+    Promise.all([
+      api.get('/projects').catch(() => ({ data: [] })),
+      api.get('/contact').catch(() => ({ data: [] })),
+    ]).then(([projRes, msgRes]) => {
+      const projects = projRes.data.data || projRes.data || [];
+      const messages = msgRes.data.data || msgRes.data || [];
+      setStats({ projects: projects.length, messages: messages.length, unread: messages.filter(m => !m.isRead).length });
+      setRecentMessages(messages.slice(0, 5));
+    }).finally(() => setLoading(false));
+  }, []);
 
-  const markRead = async (id) => {
-    try {
-      await api.patch(`/contact/${id}/read`)
-      setMsgs(ms => ms.map(m => m._id === id ? { ...m, status: 'read' } : m))
-      setStats(s => ({ ...s, unread: Math.max(0, s.unread - 1) }))
-    } catch (err) {
-      console.error("Error marking as read:", err)
-    }
-  }
-
-  // Memoize STATS to prevent unnecessary re-renders
-  const STATS_DATA = useMemo(() => [
-    { icon: 'bi-collection',    label: 'Total Projects', value: stats.projects, sub: 'Active portfolio items',   accent: '#c6ff00' },
-    { icon: 'bi-chat-text',     label: 'Total Messages', value: stats.messages, sub: 'Contact form submissions', accent: '#60a5fa' },
-    { icon: 'bi-envelope-open', label: 'Unread',         value: stats.unread,   sub: 'Awaiting your response',  accent: '#ff3c5f' },
-    { icon: 'bi-eye',           label: 'Page Views',     value: '2.4k',         sub: 'This month (demo)',        accent: '#4dffb4' },
-  ], [stats])
+  if (loading) return <div style={{ display: 'flex', justifyContent: 'center', padding: 80 }}><div style={{ width: 40, height: 40, borderRadius: '50%', border: '3px solid rgba(124,106,247,0.2)', borderTop: '3px solid #7c6af7', animation: 'spin 1s linear infinite' }}></div><style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style></div>;
 
   return (
-    <div className="animate-fade-in">
-      {/* Header */}
-      <div style={{ marginBottom: 28 }}>
-        <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '2rem', letterSpacing: '0.04em', color: 'var(--clr-text)', marginBottom: 4 }}>
-          DASHBOARD
-        </h1>
-        <p style={{ color: 'var(--clr-muted)', fontSize: '0.88rem' }}>
-          Welcome back, <span style={{ color: 'var(--clr-accent)', fontWeight: 600 }}>{user?.name || 'Admin'}</span>! Here's what's happening.
-        </p>
+    <div>
+      <div style={{ marginBottom: 32 }}>
+        <h1 style={{ fontFamily: 'Syne, sans-serif', fontSize: '1.8rem', fontWeight: 700 }}>Dashboard</h1>
+        <p style={{ color: '#6b6880', marginTop: 4 }}>Welcome back! Here's your portfolio overview.</p>
       </div>
-
-      {/* Stat cards */}
-      <div className="row g-3 mb-4">
-        {STATS_DATA.map(s => (
-          <div className="col-6 col-lg-3" key={s.label}>
-            <StatCard {...s} loading={loading} />
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 20, marginBottom: 32 }}>
+        <StatCard icon="bi-grid-3x3-gap" label="Total Projects" value={stats.projects} color="#7c6af7" trend="+2 this month" />
+        <StatCard icon="bi-envelope" label="Total Messages" value={stats.messages} color="#e879f9" />
+        <StatCard icon="bi-envelope-open" label="Unread Messages" value={stats.unread} color="#fb923c" trend={stats.unread > 0 ? 'New!' : null} />
+        <StatCard icon="bi-eye" label="Portfolio Views" value="—" color="#38bdf8" />
+      </div>
+      <div style={{ background: '#0d0d14', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 16, overflow: 'hidden' }}>
+        <div style={{ padding: '20px 24px', borderBottom: '1px solid rgba(255,255,255,0.06)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <h2 style={{ fontFamily: 'Syne, sans-serif', fontSize: '1rem', fontWeight: 700 }}>Recent Messages</h2>
+          <a href="/admin/messages" style={{ color: '#7c6af7', fontSize: '0.8rem' }}>View all →</a>
+        </div>
+        {recentMessages.length === 0 ? (
+          <div style={{ padding: 48, textAlign: 'center', color: '#6b6880' }}><i className="bi bi-inbox" style={{ fontSize: '2.5rem', display: 'block', marginBottom: 12 }}></i>No messages yet</div>
+        ) : recentMessages.map((m, i) => (
+          <div key={m._id} style={{ padding: '16px 24px', borderBottom: i < recentMessages.length - 1 ? '1px solid rgba(255,255,255,0.04)' : 'none', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 16, background: !m.isRead ? 'rgba(124,106,247,0.03)' : 'transparent' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12, minWidth: 0 }}>
+              <div style={{ width: 38, height: 38, borderRadius: 10, background: 'rgba(124,106,247,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: '0.85rem', color: '#7c6af7', flexShrink: 0 }}>{m.name?.[0]?.toUpperCase()}</div>
+              <div style={{ minWidth: 0 }}>
+                <div style={{ fontWeight: 600, fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: 6 }}>
+                  {m.name} {!m.isRead && <span style={{ width: 6, height: 6, background: '#7c6af7', borderRadius: '50%', flexShrink: 0 }}></span>}
+                </div>
+                <div style={{ color: '#6b6880', fontSize: '0.8rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{m.subject || m.message?.slice(0, 50)}</div>
+              </div>
+            </div>
+            <span style={{ color: '#6b6880', fontSize: '0.75rem', whiteSpace: 'nowrap' }}>{new Date(m.createdAt).toLocaleDateString()}</span>
           </div>
         ))}
       </div>
-
-      <div className="row g-4">
-        {/* Recent Messages */}
-        <div className="col-lg-6">
-          <div style={{
-            background: 'var(--clr-card)',
-            border: '1px solid var(--clr-border)',
-            borderRadius: 'var(--radius-md)',
-            padding: '24px',
-            height: '100%'
-          }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-              <h5 style={{ fontFamily: 'var(--font-display)', fontSize: '1rem', letterSpacing: '0.04em', color: 'var(--clr-text)', margin: 0 }}>
-                RECENT MESSAGES
-              </h5>
-              <Link to="/admin/messages" style={{ fontSize: '0.75rem', color: 'var(--clr-accent)', textDecoration: 'none', fontWeight: 600 }}>
-                View all →
-              </Link>
-            </div>
-            {loading
-              ? Array(4).fill(0).map((_, i) => (
-                  <div key={i} className="skeleton-line" style={{ height: 48, background: 'rgba(255,255,255,0.03)', borderRadius: 8, marginBottom: 8 }} />
-                ))
-              : msgs.length === 0
-                ? <p style={{ color: 'var(--clr-muted)', fontSize: '0.85rem', padding: '20px 0' }}>No messages yet.</p>
-                : msgs.map(m => <MsgRow key={m._id} msg={m} onRead={markRead} />)
-            }
-          </div>
-        </div>
-
-        {/* Recent Projects */}
-        <div className="col-lg-6">
-          <div style={{
-            background: 'var(--clr-card)',
-            border: '1px solid var(--clr-border)',
-            borderRadius: 'var(--radius-md)',
-            padding: '24px',
-            height: '100%'
-          }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-              <h5 style={{ fontFamily: 'var(--font-display)', fontSize: '1rem', letterSpacing: '0.04em', color: 'var(--clr-text)', margin: 0 }}>
-                RECENT PROJECTS
-              </h5>
-              <Link to="/admin/projects" style={{ fontSize: '0.75rem', color: 'var(--clr-accent)', textDecoration: 'none', fontWeight: 600 }}>
-                Manage →
-              </Link>
-            </div>
-            {loading
-              ? Array(4).fill(0).map((_, i) => (
-                  <div key={i} className="skeleton-line" style={{ height: 56, background: 'rgba(255,255,255,0.03)', borderRadius: 8, marginBottom: 8 }} />
-                ))
-              : projs.length === 0
-                ? <p style={{ color: 'var(--clr-muted)', fontSize: '0.85rem', padding: '20px 0' }}>No projects yet.</p>
-                : projs.map(p => (
-                    <div key={p._id} style={{
-                      display: 'flex', alignItems: 'center', gap: 14,
-                      padding: '12px 0',
-                      borderBottom: '1px solid var(--clr-border)',
-                    }}>
-                      <div style={{
-                        width: 40, height: 40,
-                        background: (p.accent || '#c6ff00') + '18',
-                        border: `1px solid ${(p.accent || '#c6ff00')}30`,
-                        borderRadius: 'var(--radius-sm)',
-                        flexShrink: 0,
-                        overflow: 'hidden',
-                      }}>
-                        {p.image
-                          ? <img src={p.image} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                          : <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
-                              <i className="bi bi-collection" style={{ color: p.accent || '#c6ff00', fontSize: '1rem' }}></i>
-                            </div>
-                        }
-                      </div>
-                      <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--clr-text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                          {p.title}
-                        </div>
-                        <div style={{ display: 'flex', gap: 6, marginTop: 3, flexWrap: 'wrap' }}>
-                          {p.tags?.slice(0, 2).map(t => (
-                            <span key={t} style={{ fontSize: '0.62rem', padding: '1px 8px', background: 'rgba(255,255,255,0.05)', borderRadius: '100px', color: 'var(--clr-muted)' }}>{t}</span>
-                          ))}
-                        </div>
-                      </div>
-                      {p.featured && (
-                        <span style={{ fontSize: '0.62rem', fontWeight: 700, color: '#c6ff00', letterSpacing: '0.06em' }}>★ FEATURED</span>
-                      )}
-                    </div>
-                  ))
-            }
-          </div>
-        </div>
-
-        {/* Quick Actions */}
-        <div className="col-12">
-          <div style={{
-            background: 'var(--clr-card)',
-            border: '1px solid var(--clr-border)',
-            borderRadius: 'var(--radius-md)',
-            padding: '24px',
-          }}>
-            <h5 style={{ fontFamily: 'var(--font-display)', fontSize: '1rem', letterSpacing: '0.04em', color: 'var(--clr-text)', marginBottom: 16 }}>
-              QUICK ACTIONS
-            </h5>
-            <div className="d-flex flex-wrap gap-3">
-              {[
-                { to: '/admin/projects', icon: 'bi-plus-circle', label: 'Add Project',    accent: '#c6ff00' },
-                { to: '/admin/messages', icon: 'bi-envelope',    label: 'View Messages',  accent: '#60a5fa' },
-                { href: '/',             icon: 'bi-eye',          label: 'Preview Site',   accent: '#4dffb4' },
-                { to: '/admin/settings', icon: 'bi-gear',         label: 'Settings',       accent: '#fb923c' },
-              ].map(a => (
-                a.to
-                  ? <Link key={a.label} to={a.to} style={{
-                      display: 'flex', alignItems: 'center', gap: 10,
-                      padding: '12px 20px',
-                      background: a.accent + '10',
-                      border: `1px solid ${a.accent}25`,
-                      borderRadius: 'var(--radius-sm)',
-                      color: a.accent,
-                      textDecoration: 'none',
-                      fontSize: '0.82rem', fontWeight: 600,
-                      transition: 'all .2s',
-                    }}
-                      onMouseEnter={e => { e.currentTarget.style.background = a.accent + '20'; e.currentTarget.style.borderColor = a.accent + '50' }}
-                      onMouseLeave={e => { e.currentTarget.style.background = a.accent + '10'; e.currentTarget.style.borderColor = a.accent + '25' }}
-                    >
-                      <i className={`bi ${a.icon}`}></i> {a.label}
-                    </Link>
-                  : <a key={a.label} href={a.href} target="_blank" rel="noreferrer" style={{
-                      display: 'flex', alignItems: 'center', gap: 10,
-                      padding: '12px 20px',
-                      background: a.accent + '10',
-                      border: `1px solid ${a.accent}25`,
-                      borderRadius: 'var(--radius-sm)',
-                      color: a.accent,
-                      textDecoration: 'none',
-                      fontSize: '0.82rem', fontWeight: 600,
-                      transition: 'all .2s',
-                    }}
-                      onMouseEnter={e => { e.currentTarget.style.background = a.accent + '20'; e.currentTarget.style.borderColor = a.accent + '50' }}
-                      onMouseLeave={e => { e.currentTarget.style.background = a.accent + '10'; e.currentTarget.style.borderColor = a.accent + '25' }}
-                    >
-                      <i className={`bi ${a.icon}`}></i> {a.label}
-                    </a>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
     </div>
-  )
+  );
 }

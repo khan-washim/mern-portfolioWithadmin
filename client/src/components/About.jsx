@@ -1,129 +1,69 @@
-import { useRef } from 'react'
-import { useReveal } from '../hooks/useReveal'
-// ইমেজ ইম্পোর্ট
-import myPhoto from '../assets/my-image.jpg' 
+import { useReveal } from '../hooks/useReveal';
 
-const TOOLS = ['React.js','Node.js','Express.js','MongoDB','Vite','Bootstrap 5','JWT','Mongoose','REST API','Git','Cloudinary','Socket.io']
-
-const TIMELINE = [
-  { year: '2022', role: 'Junior Dev', co: 'StartupXYZ' },
-  { year: '2023', role: 'Frontend Dev', co: 'TechCorp Ltd.' },
-  { year: '2024', role: 'Full Stack Dev', co: 'AgencyPro' },
-  { year: '2025', role: 'Senior MERN Dev', co: 'Freelance' },
-]
+const timeline = [
+  { year: '2022', title: 'Started MERN Journey', desc: 'Dived into full-stack development with React & Node.js' },
+  { year: '2023', title: 'First Freelance Project', desc: 'Built e-commerce platform for local business' },
+  { year: '2024', title: 'Open Source Contributions', desc: 'Active contributor to React & MongoDB communities' },
+  { year: '2025', title: 'Senior Dev Role', desc: 'Leading full-stack projects end-to-end' },
+];
 
 export default function About() {
-  const ref = useRef()
-  useReveal(ref)
-
+  const { ref } = useReveal();
   return (
-    <section id="about" className="section-py" style={{ background: 'var(--clr-surface)' }} ref={ref}>
-      <div className="container">
-        <div className="row g-5 align-items-center">
-
-          {/* ── IMAGE COLUMN ── */}
-          <div className="col-lg-5 reveal">
-            <div style={{
-              position: 'relative',
-              borderRadius: 'var(--radius-lg)',
-              overflow: 'hidden',
-              aspectRatio: '3/4',
-              background: 'var(--clr-card)',
-              border: '1px solid var(--clr-border)',
-            }}>
-              <img
-                src={myPhoto} // আপনার কাস্টম ইমেজ এখানে সেট করা হয়েছে
-                alt="Khan Washim Uddin"
-                style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: .85 }}
-              />
-              <div style={{
-                position: 'absolute', inset: 0,
-                background: 'linear-gradient(to top, rgba(8,8,8,.95) 0%, transparent 55%)',
-              }} />
-              <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '28px', zIndex: 2 }}>
-                <div style={{ fontFamily: 'var(--font-display)', fontSize: '1.8rem', letterSpacing: '0.03em', color: 'var(--clr-text)' }}>
-                  Khan Washim Uddin
+    <section id="about" ref={ref} style={{ padding: '120px 24px' }}>
+      <div style={{ maxWidth: 1200, margin: '0 auto' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 64, alignItems: 'start' }}>
+          <div className="reveal">
+            <span className="section-tag"><i className="bi bi-person"></i> About Me</span>
+            <h2 style={{ fontSize: 'clamp(2rem, 4vw, 3rem)', marginBottom: 8 }}>
+              Crafting Digital <span className="gradient-text">Experiences</span>
+            </h2>
+            <div className="section-divider"></div>
+            <p style={{ color: '#6b6880', lineHeight: 1.9, marginBottom: 20 }}>
+              I'm a passionate Full Stack Developer specializing in the MERN stack. I love turning complex problems into simple, beautiful, and intuitive solutions that make an impact.
+            </p>
+            <p style={{ color: '#6b6880', lineHeight: 1.9, marginBottom: 32 }}>
+              When I'm not coding, you'll find me exploring new technologies, contributing to open source, or writing technical articles to share knowledge with the community.
+            </p>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+              {[
+                { icon: 'bi-geo-alt', label: 'Location', val: 'Khulna, Bangladesh' },
+                { icon: 'bi-envelope', label: 'Email', val: 'washim@devfolio.com' },
+                { icon: 'bi-briefcase', label: 'Status', val: 'Available for Hire' },
+                { icon: 'bi-translate', label: 'Languages', val: 'Bengali, English' },
+              ].map(i => (
+                <div key={i.label} style={{ background: '#0d0d14', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 12, padding: 16 }}>
+                  <div style={{ color: '#7c6af7', fontSize: '1.1rem', marginBottom: 4 }}><i className={`bi ${i.icon}`}></i></div>
+                  <div style={{ fontSize: '0.72rem', color: '#6b6880', marginBottom: 2 }}>{i.label}</div>
+                  <div style={{ fontSize: '0.85rem', fontWeight: 500 }}>{i.val}</div>
                 </div>
-                <div style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--clr-accent)', letterSpacing: '0.1em', textTransform: 'uppercase', marginTop: '4px' }}>
-                  Full Stack Developer · MERN
-                </div>
-              </div>
-              {/* Accent corner icon */}
-              <div style={{
-                position: 'absolute', top: 20, right: 20,
-                width: 48, height: 48,
-                border: '2px solid var(--clr-accent)',
-                borderRadius: 'var(--radius-sm)',
-                opacity: .35,
-                zIndex: 2
-              }} />
+              ))}
             </div>
+            <a href="#contact" className="btn-primary-custom" style={{ marginTop: 32 }}>
+              <i className="bi bi-download"></i> Download CV
+            </a>
           </div>
 
-          {/* ── TEXT COLUMN ── */}
-          <div className="col-lg-7">
-            <div className="reveal d1">
-              <span className="section-label">— About Me</span>
-              <h2 className="display-heading mt-2 mb-4" style={{ fontSize: 'clamp(2.4rem,5vw,4rem)', color: 'var(--clr-text)' }}>
-                I BUILD THINGS<br/>
-                <span style={{ WebkitTextStroke: '1.5px rgba(255,255,255,0.2)', color: 'transparent' }}>FOR THE WEB.</span>
-              </h2>
-            </div>
-
-            <div className="reveal d2">
-              <p style={{ color: 'var(--clr-muted)', lineHeight: 1.85, fontSize: '1rem', marginBottom: 14 }}>
-                I'm a passionate Full Stack Developer based in Khulna, Bangladesh with 3+ years of hands-on experience crafting modern web applications. I specialize in the MERN stack and love solving complex problems with clean, maintainable code.
-              </p>
-              <p style={{ color: 'var(--clr-muted)', lineHeight: 1.85, fontSize: '1rem', marginBottom: 28 }}>
-                When I'm not coding, I'm exploring new technologies, contributing to open source, and building user-centric products. Every project is an opportunity to push the boundary of what's possible in the digital world.
-              </p>
-            </div>
-
-            {/* Technologies Grid */}
-            <div className="reveal d3 mb-4">
-              <div style={{ fontSize: '0.7rem', fontWeight: 600, letterSpacing: '0.15em', textTransform: 'uppercase', color: 'var(--clr-muted2)', marginBottom: 12 }}>
-                Technologies
-              </div>
-              <div className="d-flex flex-wrap gap-2">
-                {TOOLS.map(t => <span className="tag" key={t}>{t}</span>)}
-              </div>
-            </div>
-
-            {/* Experience Timeline */}
-            <div className="reveal d4">
-              <div style={{ fontSize: '0.7rem', fontWeight: 600, letterSpacing: '0.15em', textTransform: 'uppercase', color: 'var(--clr-muted2)', marginBottom: 14 }}>
-                Experience
-              </div>
-              <div className="d-flex flex-column gap-3">
-                {TIMELINE.map((t, i) => (
-                  <div key={i} className="d-flex align-items-center gap-3">
-                    <div style={{
-                      fontFamily: 'var(--font-display)',
-                      fontSize: '1rem',
-                      color: 'var(--clr-accent)',
-                      minWidth: '52px',
-                      letterSpacing: '0.04em',
-                    }}>{t.year}</div>
-                    <div style={{ width: 1, height: 28, background: 'var(--clr-border)', flexShrink: 0 }} />
-                    <div>
-                      <div style={{ fontWeight: 600, fontSize: '0.9rem', color: 'var(--clr-text)' }}>{t.role}</div>
-                      <div style={{ fontSize: '0.78rem', color: 'var(--clr-muted)' }}>{t.co}</div>
-                    </div>
+          <div className="reveal" style={{ transitionDelay: '0.2s' }}>
+            <h3 style={{ fontFamily: 'Syne, sans-serif', fontSize: '1.3rem', marginBottom: 32, color: '#6b6880', fontWeight: 500 }}>My Journey</h3>
+            <div style={{ position: 'relative', paddingLeft: 32 }}>
+              <div style={{ position: 'absolute', left: 9, top: 0, bottom: 0, width: 2, background: 'linear-gradient(to bottom, #7c6af7, #e879f9, transparent)' }}></div>
+              {timeline.map((t, i) => (
+                <div key={i} style={{ position: 'relative', marginBottom: 40 }}>
+                  <div style={{ position: 'absolute', left: -27, top: 4, width: 16, height: 16, background: 'linear-gradient(135deg, #7c6af7, #e879f9)', borderRadius: '50%', border: '3px solid #050508' }}></div>
+                  <div style={{ background: '#0d0d14', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 14, padding: '20px 24px', transition: 'border-color 0.3s' }}
+                    onMouseEnter={e => e.currentTarget.style.borderColor = 'rgba(124,106,247,0.3)'}
+                    onMouseLeave={e => e.currentTarget.style.borderColor = 'rgba(255,255,255,0.06)'}>
+                    <span style={{ fontFamily: 'Syne, sans-serif', fontSize: '0.75rem', fontWeight: 700, color: '#7c6af7', letterSpacing: '1px' }}>{t.year}</span>
+                    <h4 style={{ fontSize: '1rem', marginTop: 4, marginBottom: 6 }}>{t.title}</h4>
+                    <p style={{ fontSize: '0.875rem', color: '#6b6880', lineHeight: 1.6 }}>{t.desc}</p>
                   </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Download Action */}
-            <div className="reveal d5 mt-4">
-              <a href="#" className="btn-accent" style={{ fontSize: '0.8rem', padding: '12px 28px' }}>
-                <i className="bi bi-download"></i> Download CV
-              </a>
+                </div>
+              ))}
             </div>
           </div>
-
         </div>
       </div>
     </section>
-  )
+  );
 }

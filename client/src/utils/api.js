@@ -1,27 +1,22 @@
-import axios from 'axios'
+import axios from 'axios';
 
-const api = axios.create({
-  baseURL: '/api',
-  timeout: 10000,
-  headers: { 'Content-Type': 'application/json' }
-})
+const api = axios.create({ baseURL: '/api' });
 
-// Request interceptor — attach token if exists
-api.interceptors.request.use(config => {
-  const token = localStorage.getItem('token')
-  if (token) config.headers.Authorization = `Bearer ${token}`
-  return config
-})
+api.interceptors.request.use(cfg => {
+  const token = localStorage.getItem('token');
+  if (token) cfg.headers.Authorization = `Bearer ${token}`;
+  return cfg;
+});
 
-// Response interceptor — handle errors globally
 api.interceptors.response.use(
   res => res,
   err => {
     if (err.response?.status === 401) {
-      localStorage.removeItem('token')
+      localStorage.removeItem('token');
+      window.location.href = '/admin/login';
     }
-    return Promise.reject(err)
+    return Promise.reject(err);
   }
-)
+);
 
-export default api
+export default api;

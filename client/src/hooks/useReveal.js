@@ -1,33 +1,18 @@
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react';
 
-export function useReveal(ref) {
+export function useReveal() {
+  const ref = useRef(null);
+
   useEffect(() => {
-    const el = ref?.current
-    if (!el) return
+    if (!ref.current) return;
+    const els = ref.current.querySelectorAll('.reveal');
     const observer = new IntersectionObserver(
-      entries => entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('in') }),
+      entries => entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); }),
       { threshold: 0.1 }
-    )
-    el.querySelectorAll('.reveal').forEach(node => observer.observe(node))
-    return () => observer.disconnect()
-  }, [ref])
-}
+    );
+    els.forEach(el => observer.observe(el));
+    return () => observer.disconnect();
+  }, []);
 
-export function useSkillBars(ref) {
-  useEffect(() => {
-    const el = ref?.current
-    if (!el) return
-    const observer = new IntersectionObserver(entries => {
-      entries.forEach(e => {
-        if (e.isIntersecting) {
-          e.currentTarget.querySelectorAll('.skill-fill').forEach(bar => {
-            bar.style.width = bar.dataset.w
-          })
-          observer.disconnect()
-        }
-      })
-    }, { threshold: 0.3 })
-    observer.observe(el)
-    return () => observer.disconnect()
-  }, [ref])
+  return { ref };
 }

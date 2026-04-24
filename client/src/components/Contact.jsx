@@ -1,169 +1,91 @@
-import { useState, useRef } from 'react'
-import { useReveal } from '../hooks/useReveal'
-import api from '../utils/api'
-
-const SOCIALS = [
-  { icon: 'bi-github',    label: 'GitHub',    href: '#' },
-  { icon: 'bi-linkedin',  label: 'LinkedIn',  href: '#' },
-  { icon: 'bi-twitter-x', label: 'Twitter',   href: '#' },
-  { icon: 'bi-facebook',  label: 'Facebook',  href: '#' },
-]
-const INFO = [
-  { icon: 'bi-envelope-at', label: 'Email',    val: 'hello@devfolio.com' },
-  { icon: 'bi-telephone',   label: 'Phone',    val: '+880 1700-000000' },
-  { icon: 'bi-geo-alt',     label: 'Location', val: 'Dhaka, Bangladesh' },
-  { icon: 'bi-clock',       label: 'Response', val: 'Within 24 hours' },
-]
+import { useState } from 'react';
+import api from '../utils/api';
+import { useReveal } from '../hooks/useReveal';
 
 export default function Contact() {
-  const ref = useRef()
-  const [form, setForm] = useState({ name:'', email:'', subject:'', message:'' })
-  const [status, setStatus] = useState(null) // null | 'loading' | 'ok' | 'err'
-  const [errMsg, setErrMsg] = useState('')
-  useReveal(ref)
-
-  const set = k => e => setForm(f => ({ ...f, [k]: e.target.value }))
+  const { ref } = useReveal();
+  const [form, setForm] = useState({ name: '', email: '', subject: '', message: '' });
+  const [status, setStatus] = useState(null);
 
   const handleSubmit = async e => {
-    e.preventDefault()
-    setStatus('loading')
+    e.preventDefault();
+    setStatus('loading');
     try {
-      await api.post('/contact', form)
-      setStatus('ok')
-      setForm({ name:'', email:'', subject:'', message:'' })
-    } catch(err) {
-      setStatus('err')
-      setErrMsg(err.response?.data?.message || 'Something went wrong. Please try again.')
-    }
-  }
+      await api.post('/contact', form);
+      setStatus('success');
+      setForm({ name: '', email: '', subject: '', message: '' });
+    } catch { setStatus('error'); }
+    setTimeout(() => setStatus(null), 5000);
+  };
+
+  const contactInfo = [
+    { icon: 'bi-envelope-open', label: 'Email', val: 'washim@devfolio.com', href: 'mailto:washim@devfolio.com' },
+    { icon: 'bi-telephone', label: 'Phone', val: '+880 1234 567890', href: 'tel:+8801234567890' },
+    { icon: 'bi-geo-alt', label: 'Location', val: 'Khulna, Bangladesh', href: '#' },
+  ];
+
+  const socials = [
+    { icon: 'bi-github', href: 'https://github.com/khan-washim', label: 'GitHub' },
+    { icon: 'bi-linkedin', href: '#', label: 'LinkedIn' },
+    { icon: 'bi-twitter-x', href: '#', label: 'Twitter' },
+  ];
 
   return (
-    <section id="contact" className="section-py" ref={ref}>
-      <div className="container">
-        {/* Header */}
-        <div className="text-center mb-5 reveal">
-          <span className="section-label">— Get In Touch</span>
-          <h2 className="display-heading mt-2" style={{ fontSize:'clamp(2.4rem,5vw,4rem)', color:'var(--clr-text)' }}>
-            LET'S WORK<br/>
-            <span style={{ WebkitTextStroke:'1.5px rgba(255,255,255,.2)', color:'transparent' }}>TOGETHER.</span>
-          </h2>
-          <p style={{ color:'var(--clr-muted)', maxWidth:440, margin:'16px auto 0', lineHeight:1.8, fontSize:'.95rem' }}>
-            Have a project in mind? A question? Or just want to say hi? I'm always open to a conversation.
-          </p>
+    <section id="contact" ref={ref} style={{ padding: '120px 24px', background: 'rgba(13,13,20,0.5)' }}>
+      <div style={{ maxWidth: 1200, margin: '0 auto' }}>
+        <div style={{ textAlign: 'center', marginBottom: 64 }} className="reveal">
+          <span className="section-tag"><i className="bi bi-chat-dots"></i> Contact</span>
+          <h2 style={{ fontSize: 'clamp(2rem, 4vw, 3rem)' }}>Let's <span className="gradient-text">Collaborate</span></h2>
+          <p style={{ color: '#6b6880', maxWidth: 480, margin: '16px auto 0' }}>Have a project in mind? I'd love to hear about it. Send me a message and let's build something great.</p>
         </div>
-
-        <div className="row g-5 justify-content-center">
-          {/* Info */}
-          <div className="col-lg-4 reveal d1">
-            <div className="d-flex flex-column gap-3 mb-4">
-              {INFO.map(x => (
-                <div key={x.label} className="glass-card d-flex align-items-center gap-3 p-3">
-                  <div style={{
-                    width:44, height:44, flexShrink:0,
-                    background:'rgba(198,255,0,.07)',
-                    border:'1px solid rgba(198,255,0,.12)',
-                    borderRadius:'var(--radius-sm)',
-                    display:'flex', alignItems:'center', justifyContent:'center',
-                  }}>
-                    <i className={`bi ${x.icon}`} style={{ color:'var(--clr-accent)', fontSize:'1rem' }}></i>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 40 }}>
+          <div className="reveal">
+            <div className="glass-card" style={{ padding: 36, marginBottom: 20 }}>
+              <h3 style={{ fontFamily: 'Syne, sans-serif', fontSize: '1.2rem', marginBottom: 24 }}>Contact Info</h3>
+              {contactInfo.map(c => (
+                <a key={c.label} href={c.href} style={{ display: 'flex', alignItems: 'center', gap: 16, padding: '14px 0', borderBottom: '1px solid rgba(255,255,255,0.05)', color: 'inherit', transition: 'color 0.2s' }}
+                  onMouseEnter={e => e.currentTarget.style.color = '#7c6af7'}
+                  onMouseLeave={e => e.currentTarget.style.color = 'inherit'}>
+                  <div style={{ width: 42, height: 42, borderRadius: 12, background: 'rgba(124,106,247,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1rem', color: '#7c6af7', flexShrink: 0 }}>
+                    <i className={`bi ${c.icon}`}></i>
                   </div>
                   <div>
-                    <div style={{ fontSize:'.68rem', fontWeight:600, letterSpacing:'.1em', textTransform:'uppercase', color:'var(--clr-muted2)' }}>{x.label}</div>
-                    <div style={{ fontSize:'.88rem', color:'var(--clr-text)', marginTop:2 }}>{x.val}</div>
+                    <div style={{ fontSize: '0.72rem', color: '#6b6880', marginBottom: 2 }}>{c.label}</div>
+                    <div style={{ fontSize: '0.9rem', fontWeight: 500 }}>{c.val}</div>
                   </div>
-                </div>
+                </a>
               ))}
             </div>
-
-            {/* Social */}
-            <div style={{ fontSize:'.7rem', fontWeight:600, letterSpacing:'.12em', textTransform:'uppercase', color:'var(--clr-muted2)', marginBottom:12 }}>
-              Follow Me
-            </div>
-            <div className="d-flex gap-3">
-              {SOCIALS.map(s => (
-                <a key={s.label} href={s.href} title={s.label}
-                  style={{
-                    width:42, height:42,
-                    background:'var(--clr-card)',
-                    border:'1px solid var(--clr-border)',
-                    borderRadius:'var(--radius-sm)',
-                    display:'flex', alignItems:'center', justifyContent:'center',
-                    color:'var(--clr-muted)',
-                    textDecoration:'none',
-                    transition:'all .2s',
-                  }}
-                  onMouseEnter={e=>{ e.currentTarget.style.background='var(--clr-accent)'; e.currentTarget.style.color='#000'; e.currentTarget.style.borderColor='var(--clr-accent)'; }}
-                  onMouseLeave={e=>{ e.currentTarget.style.background='var(--clr-card)'; e.currentTarget.style.color='var(--clr-muted)'; e.currentTarget.style.borderColor='var(--clr-border)'; }}
-                >
+            <div className="glass-card" style={{ padding: '24px 36px', display: 'flex', gap: 12, alignItems: 'center' }}>
+              <span style={{ color: '#6b6880', fontSize: '0.85rem', marginRight: 4 }}>Find me:</span>
+              {socials.map(s => (
+                <a key={s.label} href={s.href} target="_blank" rel="noreferrer" title={s.label} style={{ width: 40, height: 40, borderRadius: 10, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#6b6880', fontSize: '1.1rem', transition: 'all 0.2s' }}
+                  onMouseEnter={e => { e.currentTarget.style.borderColor = '#7c6af7'; e.currentTarget.style.color = '#7c6af7'; }}
+                  onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)'; e.currentTarget.style.color = '#6b6880'; }}>
                   <i className={`bi ${s.icon}`}></i>
                 </a>
               ))}
             </div>
           </div>
-
-          {/* Form */}
-          <div className="col-lg-7 reveal d2">
-            <div className="glass-card p-4 p-lg-5">
-              {status === 'ok' ? (
-                <div className="text-center py-5">
-                  <div style={{ fontSize:'3.5rem', marginBottom:16 }}>🎉</div>
-                  <h4 style={{ fontFamily:'var(--font-display)', fontSize:'1.6rem', color:'var(--clr-accent)', letterSpacing:'.04em', marginBottom:8 }}>MESSAGE SENT!</h4>
-                  <p style={{ color:'var(--clr-muted)', fontSize:'.9rem' }}>Thanks! I'll get back to you within 24 hours.</p>
-                  <button
-                    onClick={() => setStatus(null)}
-                    style={{ marginTop:20, background:'transparent', border:'1px solid var(--clr-border)', color:'var(--clr-muted)', borderRadius:'100px', padding:'8px 22px', cursor:'pointer', fontSize:'.8rem', fontFamily:'var(--font-body)', fontWeight:600 }}
-                  >
-                    Send Another
-                  </button>
+          <div className="reveal" style={{ transitionDelay: '0.2s' }}>
+            <div className="glass-card" style={{ padding: 36 }}>
+              {status === 'success' && <div style={{ background: 'rgba(34,197,94,0.1)', border: '1px solid rgba(34,197,94,0.2)', borderRadius: 12, padding: '16px 20px', marginBottom: 24, color: '#4ade80', display: 'flex', alignItems: 'center', gap: 10 }}><i className="bi bi-check-circle"></i> Message sent! I'll get back to you soon.</div>}
+              {status === 'error' && <div style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)', borderRadius: 12, padding: '16px 20px', marginBottom: 24, color: '#f87171', display: 'flex', alignItems: 'center', gap: 10 }}><i className="bi bi-x-circle"></i> Something went wrong. Please try again.</div>}
+              <form onSubmit={handleSubmit}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 }}>
+                  <div><label className="form-label">Name *</label><input className="form-input" required value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} placeholder="John Doe" /></div>
+                  <div><label className="form-label">Email *</label><input className="form-input" type="email" required value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} placeholder="john@email.com" /></div>
                 </div>
-              ) : (
-                <form onSubmit={handleSubmit}>
-                  <div className="row g-3">
-                    <div className="col-md-6">
-                      <label style={{ display:'block', fontSize:'.7rem', fontWeight:600, letterSpacing:'.1em', textTransform:'uppercase', color:'var(--clr-muted2)', marginBottom:8 }}>Name *</label>
-                      <input className="field" type="text" placeholder="Your name" value={form.name} onChange={set('name')} required />
-                    </div>
-                    <div className="col-md-6">
-                      <label style={{ display:'block', fontSize:'.7rem', fontWeight:600, letterSpacing:'.1em', textTransform:'uppercase', color:'var(--clr-muted2)', marginBottom:8 }}>Email *</label>
-                      <input className="field" type="email" placeholder="your@email.com" value={form.email} onChange={set('email')} required />
-                    </div>
-                    <div className="col-12">
-                      <label style={{ display:'block', fontSize:'.7rem', fontWeight:600, letterSpacing:'.1em', textTransform:'uppercase', color:'var(--clr-muted2)', marginBottom:8 }}>Subject *</label>
-                      <input className="field" type="text" placeholder="Project inquiry…" value={form.subject} onChange={set('subject')} required />
-                    </div>
-                    <div className="col-12">
-                      <label style={{ display:'block', fontSize:'.7rem', fontWeight:600, letterSpacing:'.1em', textTransform:'uppercase', color:'var(--clr-muted2)', marginBottom:8 }}>Message *</label>
-                      <textarea className="field" rows={5} placeholder="Tell me about your project…" value={form.message} onChange={set('message')} required style={{ resize:'none' }} />
-                    </div>
-
-                    {status === 'err' && (
-                      <div className="col-12">
-                        <div style={{ background:'rgba(255,60,95,.1)', border:'1px solid rgba(255,60,95,.2)', borderRadius:'var(--radius-sm)', padding:'10px 14px', fontSize:'.82rem', color:'#ff3c5f' }}>
-                          <i className="bi bi-exclamation-circle me-2"></i>{errMsg}
-                        </div>
-                      </div>
-                    )}
-
-                    <div className="col-12">
-                      <button
-                        type="submit"
-                        className="btn-accent w-100"
-                        disabled={status === 'loading'}
-                        style={{ justifyContent:'center', opacity: status==='loading' ? .7 : 1, cursor: status==='loading' ? 'not-allowed' : 'pointer' }}
-                      >
-                        {status === 'loading'
-                          ? <><span className="spinner-border spinner-border-sm me-2"></span>Sending…</>
-                          : <><i className="bi bi-send"></i> Send Message</>
-                        }
-                      </button>
-                    </div>
-                  </div>
-                </form>
-              )}
+                <div style={{ marginBottom: 16 }}><label className="form-label">Subject</label><input className="form-input" value={form.subject} onChange={e => setForm({ ...form, subject: e.target.value })} placeholder="Project collaboration..." /></div>
+                <div style={{ marginBottom: 24 }}><label className="form-label">Message *</label><textarea className="form-input" required value={form.message} onChange={e => setForm({ ...form, message: e.target.value })} placeholder="Tell me about your project..." /></div>
+                <button type="submit" className="btn-primary-custom" style={{ width: '100%', justifyContent: 'center' }} disabled={status === 'loading'}>
+                  {status === 'loading' ? 'Sending...' : <><i className="bi bi-send"></i> Send Message</>}
+                </button>
+              </form>
             </div>
           </div>
         </div>
       </div>
     </section>
-  )
+  );
 }

@@ -1,73 +1,104 @@
-import { useState, useEffect } from 'react'
-import { Link, useLocation } from 'react-router-dom'
-
-const links = [
-  { label: 'Home',     href: '/#home' },
-  { label: 'About',    href: '/#about' },
-  { label: 'Skills',   href: '/#skills' },
-  { label: 'Projects', href: '/#projects' },
-  { label: 'Contact',  href: '/#contact' },
-]
+import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 
 export default function Navbar() {
-  const [scrolled, setScrolled] = useState(false)
+  const [scrolled, setScrolled] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
-    const fn = () => setScrolled(window.scrollY > 40)
-    window.addEventListener('scroll', fn)
-    return () => window.removeEventListener('scroll', fn)
-  }, [])
+    const onScroll = () => setScrolled(window.scrollY > 40);
+    window.addEventListener('scroll', onScroll);
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+
+  const navLinks = [
+    { href: '#about', label: 'About' },
+    { href: '#skills', label: 'Skills' },
+    { href: '#projects', label: 'Projects' },
+    { href: '#contact', label: 'Contact' },
+  ];
 
   return (
-    <nav
-      className="navbar navbar-expand-lg fixed-top"
-      style={{
-        background: scrolled ? 'rgba(8,8,8,0.92)' : 'transparent',
-        backdropFilter: scrolled ? 'blur(24px)' : 'none',
+    <>
+      <nav style={{
+        position: 'fixed', top: 0, left: 0, right: 0, zIndex: 1000,
+        padding: '0 24px', transition: 'all 0.4s ease',
+        background: scrolled ? 'rgba(5,5,8,0.92)' : 'transparent',
+        backdropFilter: scrolled ? 'blur(20px)' : 'none',
         borderBottom: scrolled ? '1px solid rgba(255,255,255,0.06)' : 'none',
-        transition: 'all .4s ease',
-        padding: '18px 0',
-      }}
-    >
-      <div className="container">
-        <a href="/#home" className="navbar-brand navbar-brand-logo text-decoration-none">
-          Washim<span style={{ color: 'var(--clr-accent)' }}>Dev</span>
-        </a>
+      }}>
+        <div style={{
+          maxWidth: 1200, margin: '0 auto',
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: 72,
+        }}>
+          <a href="#" style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <div style={{
+              width: 36, height: 36,
+              background: 'linear-gradient(135deg, #7c6af7, #e879f9)',
+              borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontSize: '1rem', fontWeight: 800, fontFamily: 'Syne, sans-serif', color: '#fff',
+            }}>W</div>
+            <span style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: '1.1rem' }}>
+              Washim<span style={{ color: '#7c6af7' }}>.</span>
+            </span>
+          </a>
 
-        <button
-          className="navbar-toggler border-0 p-0"
-          type="button"
-          data-bs-toggle="collapse"
-          data-bs-target="#mainNav"
-          style={{ boxShadow: 'none' }}
-        >
-          <i className="bi bi-list" style={{ color: 'var(--clr-text)', fontSize: '1.6rem' }}></i>
-        </button>
-
-        <div className="collapse navbar-collapse" id="mainNav">
-          <ul className="navbar-nav ms-auto align-items-lg-center gap-lg-1">
-            {links.map(l => (
-              <li className="nav-item" key={l.label}>
-                <a className="nav-link nav-pill-link" href={l.href}
-                  onClick={() => {
-                    const c = document.getElementById('mainNav')
-                    if (c?.classList.contains('show')) {
-                      c.classList.remove('show')
-                    }
-                  }}
-                >
-                  {l.label}
-                </a>
-              </li>
-            ))}
-            <li className="nav-item ms-lg-3">
-              <a href="/#contact" className="btn-accent" style={{ padding: '10px 24px', fontSize: '0.78rem' }}>
-                Hire Me <i className="bi bi-arrow-up-right"></i>
+          <div className="desktop-nav" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            {navLinks.map(l => (
+              <a key={l.href} href={l.href} style={{
+                color: '#6b6880', fontFamily: 'DM Sans, sans-serif', fontWeight: 500,
+                fontSize: '0.9rem', padding: '8px 16px', borderRadius: 50,
+                transition: 'all 0.2s',
+              }}
+              onMouseEnter={e => { e.target.style.color = '#e8e6f0'; e.target.style.background = 'rgba(255,255,255,0.05)'; }}
+              onMouseLeave={e => { e.target.style.color = '#6b6880'; e.target.style.background = 'transparent'; }}>
+                {l.label}
               </a>
-            </li>
-          </ul>
+            ))}
+            <Link to="/admin/login" style={{
+              background: 'linear-gradient(135deg, #7c6af7, #e879f9)',
+              color: '#fff', border: 'none', padding: '9px 20px',
+              borderRadius: 50, fontFamily: 'Syne, sans-serif', fontWeight: 600,
+              fontSize: '0.85rem', marginLeft: 8,
+            }}>Admin</Link>
+          </div>
+
+          <button onClick={() => setMenuOpen(!menuOpen)} className="hamburger-btn" style={{
+            background: 'none', border: 'none', cursor: 'pointer',
+            color: '#e8e6f0', fontSize: '1.5rem', padding: 4, display: 'none',
+          }}>
+            <i className={`bi ${menuOpen ? 'bi-x-lg' : 'bi-list'}`}></i>
+          </button>
         </div>
-      </div>
-    </nav>
-  )
+      </nav>
+
+      {menuOpen && (
+        <div style={{
+          position: 'fixed', inset: 0, zIndex: 999,
+          background: 'rgba(5,5,8,0.98)',
+          display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 32,
+        }}>
+          {navLinks.map(l => (
+            <a key={l.href} href={l.href} onClick={() => setMenuOpen(false)} style={{
+              fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: '2rem', color: '#e8e6f0',
+            }}
+            onMouseEnter={e => e.target.style.color = '#7c6af7'}
+            onMouseLeave={e => e.target.style.color = '#e8e6f0'}>{l.label}</a>
+          ))}
+          <Link to="/admin/login" onClick={() => setMenuOpen(false)} style={{
+            background: 'linear-gradient(135deg, #7c6af7, #e879f9)',
+            color: '#fff', padding: '12px 32px', borderRadius: 50,
+            fontFamily: 'Syne, sans-serif', fontWeight: 600, fontSize: '1rem',
+          }}>Admin Panel</Link>
+        </div>
+      )}
+
+      <style>{`
+        @media (max-width: 768px) {
+          .desktop-nav { display: none !important; }
+          .hamburger-btn { display: block !important; }
+        }
+      `}</style>
+    </>
+  );
 }
